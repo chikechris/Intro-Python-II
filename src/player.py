@@ -2,9 +2,18 @@
 # currently.
 
 
-class Player:
-    def __init__(self, location):
-        self.location = location    # room they are currently in
 
-           def change_location(self, new_location):
-        self.location = new_location
+class Player:
+    def __init__(self, name, current_room):
+        self.name = name
+        self.current_room = current_room
+        self.items = []
+
+    def get_name(self):
+        return self.name
+
+    def get_location(self):
+        return self.current_room
+
+    def set_location(self, new_room):
+        self.current_room = new_room

@@ -1,9 +1,7 @@
 from room import Room
 from player import Player
-
-# Instantiate a few new Room objects
+from item import Item
 # Declare all the rooms
-
 
 room = {
     'outside':  Room("Outside Cave Entrance",
@@ -24,6 +22,14 @@ chamber! Sadly, it has already been completely emptied by
 earlier adventurers. The only exit is to the south."""),
 }
 
+item = {
+    'coins': Item('Coins', 'You will unlock everything in this coins'),
+
+    'key': Item('Key', 'get the key access to all the doors'),
+
+    'pencil': Item('pencil', 'Just write your dream')
+}
+
 
 # Link rooms together
 
@@ -36,46 +42,141 @@ room['narrow'].w_to = room['foyer']
 room['narrow'].n_to = room['treasure']
 room['treasure'].s_to = room['narrow']
 
+#  rooms link to items
+room['overlook'].items.append(item['coins'])
+room['narrow'].items.append(item['key'])
+room['foyer'].items.append(item['pencil'])
+
+
+
+
+
 #
 # Main
 #
 
 # Make a new player object that is currently in the 'outside' room.
-player = Player(room['outside'])
 
 # Write a loop that:
-while True:
-    #
-    # * Prints the current room name in the color green
-    # which room the player currently is in
-    print("\n\x1b[32m You are in the {}.".format(player.location.name))
+#
+# * Prints the current room name
 # * Prints the current description (the textwrap module might be useful here).
-    print(player.location.description)
 # * Waits for user input and decides what to do.
-    input_cmd = input("What would you like to do: ")
-
-    command = input_cmd
-# If the user enters "q", quit the game.
-    # Upper Method automatically converts
-    # any lowercase entries to UPPERCASE
-    # to fascilitate better user experience
-    # and avoid errors or non-responsiveness
-    if command.upper() == "Q":
-        print("\nTHANK YOU FOR PLAYING!\nHOPE TO SEE YOU AGAIN SOON :) \n")
-        break
 #
 # If the user enters a cardinal direction, attempt to move to the room there.
-    if command.upper() == "N" or command.upper() == "S" or command.upper() == "E" or command.upper() == "W":
-        enter_room = player.location.direction_to_move_in(command.upper())
-
-        # If there is no room in the dicrection you want to move in, print an error message
-        if enter_room == None:
-            print(
-                "\n===Moving in that direction is not an option===\n           Please try again\n")
-        else:
-            # Else move the user to the room specified
-            player.change_location(enter_room)
-
 # Print an error message if the movement isn't allowed.
-    else:
-        print("\n===I don't think I know what to do with that===\n          Please try another command\n")
+#
+# If the user enters "q", quit the game.
+
+
+def starting():
+    player_name = input('What is your name?\n')
+
+    current_player = Player(player_name, room['outside'])
+
+    print(
+        f'Welcome {current_player.get_name()}! Your current location is: {current_player.get_location().name}\n'
+    )
+
+    def print_current_location():
+        print(f'You are now in the {current_player.get_location().name}\n')
+
+    def is_valid_move(move):
+        if move != None:
+            return True
+        else:
+            return False
+
+    def items_available(room):
+        if (len(room.items)):
+            return True
+        else:
+            return False
+
+    nl = '\n'
+
+    def print_items(room):
+        print(
+            f'It contains: {nl}{nl.join(str(x.name) for x in room.items)}{nl}'
+        )
+
+    while True:
+        answer = input('Select the direction do you want to go?')
+
+        if(len(answer.split(', ')) == 1):
+            if (answer == 'n' or answer == 's' or answer == 'w' or answer == 'e'):
+                if answer == 'n':
+                    if is_valid_move(current_player.get_location().n_to):
+                        current_player.set_location(
+                            current_player.get_location().n_to
+                        )
+
+                        print_current_location()
+
+                        if items_available(current_player.get_location()):
+                            print_items(current_player.get_location())
+
+                    else:
+                        print(
+                            'Path does not exists. Try another direction.\n'
+                        )
+                if answer == "s":
+                    if is_valid_move(current_player.get_location().s_to):
+                        current_player.set_location(
+                            current_player.get_location().s_to
+                        )
+                        print_current_location()
+
+                    else:
+                        print(
+                            'Path does not exists. Try another direction.\n'
+                        )
+                if answer == "w":
+                    if is_valid_move(current_player.get_location().w_to):
+                        current_player.set_location(
+                            current_player.get_location().w_to
+                        )
+                        print_current_location()
+
+                    else:
+                        print(
+                            'Path does not exists. Try another direction.\n'
+                        )
+                if answer == "e":
+                    if is_valid_move(current_player.get_location().e_to):
+                        current_player.set_location(
+                            current_player.get_location().e_to
+                        )
+                        print_current_location()
+
+                    else:
+                        print(
+                            'Path does not exists. Try another direction.\n'
+                        )
+            elif (answer == 'q'):
+                print(f'Thanks for playing!')
+                break
+            else:
+                print(
+                    f'Seems like you entered a wrong value. Either n,s,w,e or q for quit')
+        else:
+            split_input = answer.split()
+
+            if split_input[0] == 'get' or split_input[0] == 'drop':
+                if split_input[0] == 'get':
+                    if items_available(current_player.get_location()):
+                        current_player.items.append(item[split_input[1]])
+                        current_player.current_room.items.remove(
+                            item[split_input[1]]
+                        )
+
+                        print(f'You got: {current_player.items[0].name}!{nl}')
+                else:
+                    print('Item does not exist!')
+            else:
+                print(
+                    'Invalid command: use either "take" or "drop" to interact with items'
+                )
+
+
+starting()
