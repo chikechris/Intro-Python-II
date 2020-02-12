@@ -15,5 +15,5 @@ class Player:
     def get_location(self):
         return self.current_room
 
-    def set_location(self, new_room):
+    def get_location(self, new_room):
         self.current_room = new_room
